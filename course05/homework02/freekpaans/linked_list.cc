@@ -3,6 +3,14 @@
 
 #include "linked_list.h"
 
+static void push_at(LinkedList::LinkPtr& link, const std::string& str)
+{
+	LinkedList::LinkPtr newLink{new LinkedList::Link { str, {} }};
+
+	newLink->mNext = std::move(link);
+	link = std::move(newLink);
+}
+
 LinkedList::LinkedList(const LinkedList& from)
 {
 	std::accumulate(
@@ -10,7 +18,8 @@ LinkedList::LinkedList(const LinkedList& from)
 		std::ref(mFront),
 		[](LinkPtr& output, const std::string& item) -> LinkPtr&
 		{
-			output.reset(new Link { item, {} });
+			push_at(output, item);
+
 			return output->mNext;
 		});
 }
@@ -25,14 +34,6 @@ LinkedList& LinkedList::operator=(const LinkedList& from)
 LinkedList::size_type LinkedList::size() const
 {
 	return std::distance(begin(), end());
-}
-
-static void push_at(LinkedList::LinkPtr& link, const std::string& str)
-{
-	LinkedList::LinkPtr newLink{new LinkedList::Link { str, {} }};
-
-	newLink->mNext = std::move(link);
-	link = std::move(newLink);
 }
 
 void LinkedList::push_front(const std::string& str)
