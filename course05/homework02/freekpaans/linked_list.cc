@@ -1,16 +1,18 @@
 #include <string>
+#include <numeric>
 
 #include "linked_list.h"
 
 LinkedList::LinkedList(const LinkedList& from)
 {
-	std::unique_ptr<Link>* outputLink = &mFront;
-
-	for(const auto& item : from)
-	{
-		outputLink->reset(new Link { item, {} });
-		outputLink = &(outputLink->get()->mNext);
-	}
+	std::accumulate(
+		from.begin(), from.end(),
+		std::ref(mFront),
+		[](std::unique_ptr<Link>& output, const std::string& item) -> std::unique_ptr<Link>&
+		{
+			output.reset(new Link { item, {} });
+			return output->mNext;
+		});
 }
 
 LinkedList& LinkedList::operator=(const LinkedList& from)
@@ -63,5 +65,5 @@ std::unique_ptr<LinkedList::Link>* LinkedList::find_link(LinkedList::size_type i
 void LinkedList::insert_at(LinkedList::size_type index, const std::string& str)
 {
 	auto link = find_link(index);
-	(*link).reset(new Link { str, std::move(*link) });
+	link->reset(new Link { str, std::move(*link) });
 }
