@@ -72,7 +72,5 @@ public:
 	}
 
 private:
-	std::unique_ptr<Link>* find_link(size_type index);
-
 	std::unique_ptr<Link> mFront{};
 };

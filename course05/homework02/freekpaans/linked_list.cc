@@ -27,12 +27,17 @@ LinkedList::size_type LinkedList::size() const
 	return std::distance(begin(), end());
 }
 
+static void push_at(std::unique_ptr<LinkedList::Link>& link, const std::string& str)
+{
+	std::unique_ptr<LinkedList::Link> newLink{new LinkedList::Link { str, {} }};
+
+	newLink->mNext = std::move(link);
+	link = std::move(newLink);
+}
+
 void LinkedList::push_front(const std::string& str)
 {
-	std::unique_ptr<Link> newLink{new Link { str, {} }};
-
-	newLink->mNext = std::move(mFront);
-	mFront = std::move(newLink);
+	push_at(mFront, str);
 }
 
 void LinkedList::pop_front()
@@ -50,20 +55,20 @@ const std::string& LinkedList::at(size_type index) const
 	return *std::next(begin(), index);
 }
 
-std::unique_ptr<LinkedList::Link>* LinkedList::find_link(LinkedList::size_type index)
+static std::unique_ptr<LinkedList::Link>& find_link(std::unique_ptr<LinkedList::Link>& from,
+													LinkedList::size_type index)
 {
-	std::unique_ptr<Link>* link = &mFront;
+	std::unique_ptr<LinkedList::Link>* link = &from;
 
-	for(; index>0; index--)
+	while(index-- > 0)
 	{
-		link = &(*link)->mNext;
+		link = &link->get()->mNext;
 	}
 
-	return link;
+	return *link;
 }
 
 void LinkedList::insert_at(LinkedList::size_type index, const std::string& str)
 {
-	auto link = find_link(index);
-	link->reset(new Link { str, std::move(*link) });
+	push_at(find_link(mFront, index), str);
 }
